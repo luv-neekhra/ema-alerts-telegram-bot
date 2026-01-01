@@ -13,9 +13,6 @@ LAST_ALERTS = {}
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.json
-    print("Received payload:", data)
-    print("Expected secret:", WEBHOOK_SECRET)
-    print("Received secret:", data.get("secret"))
     if not data:
         return jsonify({"status": "error", "msg": "No data"}), 400
 
@@ -30,7 +27,8 @@ def webhook():
     price = data.get("price")
 
     key = f"{symbol}_{timeframe}_{signal}"
-    now = datetime.utcnow()
+    IST = timezone(timedelta(hours=5, minutes=30))
+    now = datetime.now(IST)
 
     if key in LAST_ALERTS and (now - LAST_ALERTS[key]).seconds < 60:
         return jsonify({"status": "duplicate"}), 200
@@ -40,10 +38,10 @@ def webhook():
     message = (
         f"🚨 EMA Crossover Alert\n\n"
         f"Stock: {symbol}\n"
-        f"Timeframe: {timeframe}\n"
+        f"Timeframe: {timeframe}m\n"
         f"Signal: {signal}\n"
         f"Price: {price}\n"
-        f"Time: {now.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+        f"Time: {now.strftime('%Y-%m-%d %H:%M:%S')} IST"
     )
 
     send_message(message)
