@@ -13,6 +13,9 @@ LAST_ALERTS = {}
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.json
+    print("Received payload:", data)
+    print("Expected secret:", WEBHOOK_SECRET)
+    print("Received secret:", data.get("secret"))
     if not data:
         return jsonify({"status": "error", "msg": "No data"}), 400
 
